@@ -1,0 +1,73 @@
+﻿@using VacationPlanner.Entity.Model
+@inject PlannerService OtusService
+
+@if (Departments == null || Positions == null)
+{
+    <p>
+        <em>Loading ...</em>
+    </p>
+}
+else
+{
+    <EditForm Model="User" class="teacher-form">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <label class="teacher-form__label">
+            <div>Last name:</div>
+            <InputText @bind-Value="User.LastName" class="teacher-form__input"/>
+        </label>
+        <label class="teacher-form__label">
+            <div>First name:</div>
+            <InputText @bind-Value="User.FirstName" class="teacher-form__input"/>
+        </label>
+        <label class="teacher-form__label">
+            <div>Middle name:</div>
+            <InputText @bind-Value="User.MiddleName" class="teacher-form__input"/>
+        </label>
+        <label class="teacher-form__label">
+            <div>Department:</div>
+            <InputSelect @bind-Value="User.DepartmentId" class="teacher-form__input">
+                <option value=""></option>
+                @foreach (var department in Departments)
+                {
+                    <option value="@department.DepartmentId"> @department.Name</option>
+                }
+            </InputSelect>
+        </label>
+        <label class="teacher-form__label">
+            <div>Position:</div>
+            <InputSelect @bind-Value="User.PositionId" class="teacher-form__input">
+                <option value=""></option>
+                @foreach (var position in Positions)
+                {
+                    <option value="@position.PositionId"> @position.Name</option>
+                }
+            </InputSelect>
+        </label>
+        
+        <button @onclick="SaveTeacher" class="btn btn-primary">Submit</button>
+        <button @onclick="ModalInstance.CancelAsync" class="btn btn-secondary">Cancel</button>
+    </EditForm>
+}
+
+@code {
+
+    [CascadingParameter] BlazoredModalInstance ModalInstance { get; set; }
+
+    [Parameter] public List<PositionModel> Positions { get; set; }
+    [Parameter] public List<DepartmentModel> Departments { get; set; }
+
+    UserModel User { get; set; }
+
+    protected override void OnInitialized()
+    {
+        User = new UserModel();
+    }
+
+    void SaveTeacher()
+    {
+        User = OtusService.SaveUserAsync(User).Result;
+        ModalInstance.CloseAsync(ModalResult.Ok<UserModel>(User));
+    }
+
+}

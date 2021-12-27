@@ -1,0 +1,75 @@
+﻿@page "/users"
+@using VacationPlanner.Entity.Model
+
+@inject PlannerService PlannerService
+
+<div class="top-container">
+    <h1>Users</h1> 
+    <button class="btn btn-dark" @onclick="() => ShowAddUser()">Add user</button>
+</div>
+
+
+@if (users == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Number</th>
+                <th>Last Name</th>
+                <th>First Name</th>
+                <th>Middle Name</th>
+                <th>Position</th>
+                <th>Department</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in users)
+            {
+                <tr>
+                    <td>@user.UserId</td>
+                    <td>@user.LastName</td>
+                    <td>@user.FirstName</td>
+                    <td>@user.MiddleName</td>
+                    <td>@positions.FirstOrDefault(x => x.PositionId == user.PositionId)?.Name</td>
+                    <td>@departments.FirstOrDefault(x => x.DepartmentId == user.DepartmentId)?.Name</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    [CascadingParameter] public IModalService Modal { get; set; }
+
+    private List<UserModel> users;
+    private List<PositionModel> positions;
+    private List<DepartmentModel> departments;
+
+    protected override async Task OnInitializedAsync()
+    {
+        users = await PlannerService.GetUsersAsync();
+        positions = await PlannerService.GetPositionsAsync();
+        departments = await PlannerService.GetDepartmentsAsync();
+    }
+
+    protected async void ShowAddUser()
+    {
+        var parameters = new ModalParameters();
+        parameters.Add("Positions", positions);
+        parameters.Add("Departments", departments);
+
+        var addUserForm = Modal.Show<UsersForm>("Add User", parameters);
+
+        var result = await addUserForm.Result;
+
+        if (!result.Cancelled && result.Data != null)
+        {
+            users.Add((UserModel)result.Data);
+            StateHasChanged();
+        }
+    }
+}

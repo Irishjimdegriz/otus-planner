@@ -1,1 +1,1 @@
-# otus-planner
+# blazor-otus-db

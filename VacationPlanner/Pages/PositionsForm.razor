@@ -1,0 +1,33 @@
+﻿@using VacationPlanner.Entity.Model
+@inject PlannerService OtusService
+
+<EditForm Model="Position" class="teacher-form">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <label class="teacher-form__label">
+        <div>Name:</div>
+        <InputText @bind-Value="Position.Name" class="teacher-form__input"/>
+    </label>
+
+    <button @onclick="SavePosition" class="btn btn-primary">Submit</button>
+    <button @onclick="ModalInstance.CancelAsync" class="btn btn-secondary">Cancel</button>
+</EditForm>
+
+@code {
+
+    [CascadingParameter] BlazoredModalInstance ModalInstance { get; set; }
+
+    PositionModel Position { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Position = new PositionModel();
+    }
+
+    void SavePosition()
+    {
+        Position = OtusService.SavePositionAsync(Position).Result;
+        ModalInstance.CloseAsync(ModalResult.Ok<PositionModel>(Position));
+    }
+
+}

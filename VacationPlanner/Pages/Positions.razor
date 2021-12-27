@@ -1,0 +1,59 @@
+﻿@page "/positions"
+@using VacationPlanner.Entity.Model
+
+@inject PlannerService PlannerService
+
+<div class="top-container">
+    <h1>Positions</h1> 
+    <button class="btn btn-dark" @onclick="() => ShowAddPosition()">Add position</button>
+</div>
+
+
+@if (_positions == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Number</th>
+                <th>Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var position in _positions)
+            {
+                <tr>
+                    <td>@position.PositionId</td>
+                    <td>@position.Name</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    [CascadingParameter] public IModalService Modal { get; set; }
+
+    private List<PositionModel> _positions;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _positions = await PlannerService.GetPositionsAsync();
+    }
+
+    protected async void ShowAddPosition()
+    {
+        var addPositionForm = Modal.Show<PositionsForm>("Add Position");
+
+        var result = await addPositionForm.Result;
+
+        if (!result.Cancelled && result.Data != null)
+        {
+            _positions.Add((PositionModel)result.Data);
+            StateHasChanged();
+        }
+    }
+}
